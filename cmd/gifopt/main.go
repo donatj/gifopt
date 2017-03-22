@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image/gif"
 	"log"
 	"os"
@@ -10,14 +11,19 @@ import (
 )
 
 var (
-	filename = flag.String("o", "output.gif", "Where to save the optimized gif")
+	filename  = flag.String("o", "output.gif", "Where to save the optimized gif")
+	threshold = flag.Float64("t", (1500000/float64(gifopt.MaxDistance))*100, "Max interframe color diff percent threshold")
 )
 
 func init() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s [options] <gif>:\n", os.Args[0])
+		flag.PrintDefaults()
+	}
+
 	flag.Parse()
 	if flag.NArg() != 1 {
 		flag.Usage()
-		os.Stderr.WriteString("requires one image as input")
 		os.Exit(1)
 	}
 }
@@ -34,7 +40,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	g = gifopt.InterframeCompress(g, 1500000)
+	t := (*threshold * gifopt.MaxDistance) / 100
+	g = gifopt.InterframeCompress(g, uint32(t))
 
 	outfile, err := os.Create(*filename)
 	defer outfile.Close()
