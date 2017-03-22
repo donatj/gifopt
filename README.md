@@ -5,3 +5,9 @@
 [![Build Status](https://travis-ci.org/donatj/gifopt.svg?branch=master)](https://travis-ci.org/donatj/gifopt)
 
 Simple Interframe Gif Optimizer
+
+## Install/Update Command Line Tool
+
+```bash
+go get -u github.com/donatj/gifopt/cmd/gifopt
+```
