@@ -1,38 +1,25 @@
-package main
+package gifopt
 
 import (
-	"flag"
 	"image"
 	"image/color"
 	"image/gif"
-	"log"
-	"os"
 )
 
-func init() {
-	flag.Parse()
-	if flag.NArg() != 1 {
-		flag.Usage()
-		os.Stderr.WriteString("requires one image as input")
-		os.Exit(1)
-	}
-}
+const (
+	// MaxDistance is the result of calculating dist(color.White, color.Transparent)
+	// It is slightly less than MaxUint32 and shouldn't be swaped for it.
+	MaxDistance = 4294836224
+)
 
-func main() {
-	file, err := os.Open(flag.Arg(0))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	g, err := gif.DecodeAll(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+// InterframeCompress helps optimize gifs by analyzing colors across frames and
+// setting pixels to transparent if they are below a threshold difference.
+//
+// InterframeCompress is a lossy method of removing pixels to allowing gifs LZW
+// compression to better do its job.
+func InterframeCompress(g *gif.GIF, limit uint32) *gif.GIF {
 	b := g.Image[0].Bounds()
-
 	visible := image.NewRGBA(b)
-
 	for i, img := range g.Image {
 		transInd := -1
 
@@ -53,9 +40,9 @@ func main() {
 
 				if i > 0 {
 					v := visible.At(x, y)
-					dd := Dist(c, v)
+					dd := dist(c, v)
 
-					if dd < 5000000 {
+					if dd < limit {
 						if transInd == -1 {
 							transInd = img.Palette.Index(c)
 
@@ -73,16 +60,10 @@ func main() {
 		}
 	}
 
-	outfile, err := os.Create("output.gif")
-	if err != nil {
-		log.Fatal(err)
-	}
-	gif.EncodeAll(outfile, g)
-
-	return
+	return g
 }
 
-func Dist(c color.Color, v color.Color) uint32 {
+func dist(c color.Color, v color.Color) uint32 {
 	// A batch version of this computation is in image/draw/draw.go.
 	cr, cg, cb, ca := c.RGBA()
 	vr, vg, vb, va := v.RGBA()
