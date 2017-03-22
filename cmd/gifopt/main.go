@@ -36,7 +36,7 @@ func main() {
 
 	g = gifopt.InterframeCompress(g, 1500000)
 
-	outfile, err := os.Create("output.gif")
+	outfile, err := os.Create(*filename)
 	defer outfile.Close()
 	if err != nil {
 		log.Fatal(err)
