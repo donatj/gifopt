@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 	"image/gif"
+
+	pip "github.com/JamesMilnerUK/pip-go"
 )
 
 const (
@@ -12,12 +14,17 @@ const (
 	MaxDistance = 4294836224
 )
 
+type PolygonThreshold struct {
+	Threshold uint32
+	pip.Polygon
+}
+
 // InterframeCompress helps optimize gifs by analyzing colors across frames and
 // setting pixels to transparent if they are below a threshold difference.
 //
 // InterframeCompress is a lossy method of removing pixels to allowing gifs LZW
 // compression to better do its job.
-func InterframeCompress(g *gif.GIF, limit uint32) *gif.GIF {
+func InterframeCompress(g *gif.GIF, limit uint32, ranges []PolygonThreshold) *gif.GIF {
 	if len(g.Image) < 2 {
 		return g
 	}
@@ -47,7 +54,16 @@ func InterframeCompress(g *gif.GIF, limit uint32) *gif.GIF {
 					v := visible.At(x, y)
 					dd := dist(c, v)
 
-					if dd < limit {
+					thresh := limit
+
+					for _, r := range ranges {
+						if (pip.PointInPolygon(pip.Point{X: float64(x), Y: float64(y)}, r.Polygon)) {
+							thresh = r.Threshold
+							break
+						}
+					}
+
+					if dd < thresh {
 						if transInd == -1 {
 							transInd = img.Palette.Index(c)
 
