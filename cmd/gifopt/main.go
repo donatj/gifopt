@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	pip "github.com/JamesMilnerUK/pip-go"
 	"github.com/donatj/gifopt"
@@ -17,6 +19,7 @@ const defaultFile = "<orig>.opt.gif"
 var (
 	filename  = flag.String("o", defaultFile, "Where to save the optimized gif")
 	threshold = flag.Float64("t", (1500000/float64(gifopt.MaxDistance))*100, "Max interframe color diff percent threshold")
+	regions   = flag.String("regions", "", "polygonal threshold regions")
 )
 
 func init() {
@@ -52,13 +55,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	polys := []gifopt.PolygonThreshold{
-		{
-			Threshold: distFromPercent(0),
-			Polygon: pip.Polygon{
-				Points: []pip.Point{{157, 78}, {194, 62}, {287, 57}, {328, 64}, {335, 110}, {317, 178}, {267, 219}, {222, 219}, {182, 178}, {158, 115}, {157, 78}},
-			},
-		},
+	polys, err := parseRegionString(*regions)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	g = gifopt.InterframeCompress(g, distFromPercent(*threshold), polys)
@@ -73,4 +72,51 @@ func main() {
 
 func distFromPercent(percent float64) uint32 {
 	return uint32((percent * gifopt.MaxDistance) / 100)
+}
+
+func parseRegionString(regionStr string) ([]gifopt.PolygonThreshold, error) {
+	polys := []gifopt.PolygonThreshold{}
+	if regionStr != "" {
+		poly := strings.Split(regionStr, "|")
+		for polyI, e := range poly {
+			pt := gifopt.PolygonThreshold{
+				Polygon: pip.Polygon{
+					Points: []pip.Point{},
+				},
+			}
+
+			polyparts := strings.SplitN(e, ":", 2)
+			if len(polyparts) != 2 {
+				return nil, fmt.Errorf("failed to parse region polygon %d", polyI)
+			}
+			t, err := strconv.ParseFloat(polyparts[0], 64)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse region polygon %d", polyI)
+			}
+			pt.Threshold = distFromPercent(t)
+			points := strings.Split(polyparts[1], ";")
+			for pointI, point := range points {
+				p := strings.SplitN(point, ",", 2)
+				if len(p) != 2 {
+					return nil, fmt.Errorf("failed to parse region polygon %d point %d", polyI, pointI)
+				}
+
+				x, err1 := strconv.ParseFloat(p[0], 64)
+				y, err2 := strconv.ParseFloat(p[1], 64)
+				if err1 != nil || err2 != nil {
+					return nil, fmt.Errorf("failed to parse region polygon %d point %d", polyI, pointI)
+				}
+
+				pt.Polygon.Points = append(pt.Polygon.Points, pip.Point{X: x, Y: y})
+
+			}
+
+			//ensure every polygon is closed
+			pt.Polygon.Points = append(pt.Polygon.Points, pt.Polygon.Points[0])
+
+			polys = append(polys, pt)
+		}
+	}
+
+	return polys, nil
 }
