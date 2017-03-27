@@ -18,6 +18,10 @@ const (
 // InterframeCompress is a lossy method of removing pixels to allowing gifs LZW
 // compression to better do its job.
 func InterframeCompress(g *gif.GIF, limit uint32) *gif.GIF {
+	if len(g.Image) < 2 {
+		return g
+	}
+
 	visible := image.NewRGBA(g.Image[0].Bounds())
 	for i, img := range g.Image {
 		transInd := -1
