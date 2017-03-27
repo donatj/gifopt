@@ -42,7 +42,6 @@ func InterframeCompress(g *gif.GIF, limit uint32) *gif.GIF {
 		for y := sb.Min.Y; y < sb.Max.Y; y++ {
 			for x := sb.Min.X; x < sb.Max.X; x++ {
 				c := img.At(x, y)
-				_, _, _, a := c.RGBA()
 
 				if i > 0 {
 					v := visible.At(x, y)
@@ -59,7 +58,7 @@ func InterframeCompress(g *gif.GIF, limit uint32) *gif.GIF {
 					}
 				}
 
-				if a != 0 {
+				if _, _, _, a := c.RGBA(); a != 0 {
 					visible.Set(x, y, c)
 				}
 			}
