@@ -23,7 +23,9 @@ func InterframeCompress(g *gif.GIF, limit uint32) *gif.GIF {
 	}
 
 	visible := image.NewRGBA(g.Image[0].Bounds())
+
 	for i, img := range g.Image {
+		sb := img.Bounds()
 		transInd := -1
 
 		p := color.Palette{}
@@ -36,8 +38,9 @@ func InterframeCompress(g *gif.GIF, limit uint32) *gif.GIF {
 		}
 		img.Palette = p
 
-		for y := 0; y <= b.Max.Y; y++ {
-			for x := 0; x <= b.Max.X; x++ {
+		// Some strange gifs have frames that don't start at the origin…
+		for y := sb.Min.Y; y < sb.Max.Y; y++ {
+			for x := sb.Min.X; x < sb.Max.X; x++ {
 				c := img.At(x, y)
 				_, _, _, a := c.RGBA()
 
