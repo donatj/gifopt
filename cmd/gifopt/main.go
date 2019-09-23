@@ -6,12 +6,15 @@ import (
 	"image/gif"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/donatj/gifopt"
 )
 
+const defaultFile = "<orig>.opt.gif"
+
 var (
-	filename  = flag.String("o", "output.gif", "Where to save the optimized gif")
+	filename  = flag.String("o", defaultFile, "Where to save the optimized gif")
 	threshold = flag.Float64("t", (1500000/float64(gifopt.MaxDistance))*100, "Max interframe color diff percent threshold")
 )
 
@@ -25,6 +28,14 @@ func init() {
 	if flag.NArg() != 1 {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	if *filename == defaultFile {
+		ext := filepath.Ext(flag.Arg(0))
+		path := filepath.Base(flag.Arg(0))
+		path = path[0 : len(path)-len(ext)]
+
+		*filename = path + ".opt.gif"
 	}
 }
 
