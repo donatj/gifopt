@@ -1,2 +1,5 @@
 *.gif
 /gifopt
+
+/dist
+/release
