@@ -6,8 +6,10 @@
 
 Simple Interframe Gif Optimizer
 
-## Install/Update Command Line Tool
+## Install
+
+### From Source
 
 ```bash
-go get -u github.com/donatj/gifopt/cmd/gifopt
+go install github.com/donatj/gifopt/cmd/gifopt@latest
 ```
