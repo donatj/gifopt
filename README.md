@@ -13,3 +13,7 @@ Simple Interframe Gif Optimizer
 ```bash
 go install github.com/donatj/gifopt/cmd/gifopt@latest
 ```
+
+### From Binary
+
+see: [Releases](https://github.com/donatj/gifopt/releases).
