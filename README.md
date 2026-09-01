@@ -1,6 +1,5 @@
 # gifopt
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/donatj/gifopt)](https://goreportcard.com/report/github.com/donatj/gifopt)
 [![CI](https://github.com/donatj/gifopt/actions/workflows/ci.yml/badge.svg)](https://github.com/donatj/gifopt/actions/workflows/ci.yml)
 [![GoDoc](https://godoc.org/github.com/donatj/gifopt?status.svg)](https://godoc.org/github.com/donatj/gifopt)
 
@@ -46,5 +45,4 @@ Usage of gifopt [options] <gif>:
 |-----------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------| 
 | <img src="https://user-images.githubusercontent.com/133747/192030560-b2729412-88b3-4132-90ba-d1735bcc650e.gif"> | <img src="https://user-images.githubusercontent.com/133747/192030705-3f7aa332-c9ef-406e-b982-5466f3535309.gif"> | 
 | 1.1mb                                                                                                           | .5mb                                                                                                            | 
-
 
