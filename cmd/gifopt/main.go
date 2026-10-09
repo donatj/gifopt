@@ -41,10 +41,10 @@ func init() {
 
 func main() {
 	file, err := os.Open(flag.Arg(0))
-	defer file.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
 
 	g, err := gif.DecodeAll(file)
 	if err != nil {
@@ -55,9 +55,16 @@ func main() {
 	g = gifopt.InterframeCompress(g, uint32(t))
 
 	outfile, err := os.Create(*filename)
-	defer outfile.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
-	gif.EncodeAll(outfile, g)
+
+	if err := gif.EncodeAll(outfile, g); err != nil {
+		_ = outfile.Close()
+		log.Fatal(err)
+	}
+
+	if err := outfile.Close(); err != nil {
+		log.Fatal(err)
+	}
 }
